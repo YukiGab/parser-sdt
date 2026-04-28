@@ -1,6 +1,10 @@
 import re
 #revisen esto, si pyueden agreguen algo (seguí el orden de la araña que vimos ese dia)
 token = [
+    # comentarios
+    (r'//.*', None),
+    (r'/\*[\s\S]*?\*/', None),
+
     #puntuadores
     (r'\(', 'punctuation'),
     (r'\)', 'punctuation'),
@@ -11,6 +15,7 @@ token = [
     (r';', 'punctuation'),
     (r',', 'punctuation'),
     (r'\.', 'punctuation'),
+
     #operadores
     (r'==', 'operator'),
     (r'!=', 'operator'),
@@ -26,6 +31,7 @@ token = [
     (r'<', 'operator'),
     (r'>', 'operator'),
     (r'!', 'operator'),
+
     #palabras  reservadas
     (r'\bprint\b', 'keyword'),
     (r'\bprintf\b', 'keyword'),
@@ -55,14 +61,19 @@ token = [
     (r'\btypedef\b', 'keyword'),
     (r'\bunsigned\b', 'keyword'),
     (r'\bshort\b', 'keyword'),
+
     #identificadores
     (r'[a-zA-Z_][a-zA-Z0-9_]*', 'identifier'),
+
     #constantes
     (r'\d+(\.\d+)?', 'constant'),
+
     #literales
     (r'".*?"', 'literal'),
+
     #caractes especiales
     (r'#', 'special_character'),
+    
     #vacio
     (r'\s+', None)
 ]
