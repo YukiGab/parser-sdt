@@ -1,5 +1,12 @@
-import lector
-import parser
+import os
+import sys
+
+SRC_ROOT = os.path.dirname(os.path.abspath(__file__))
+if SRC_ROOT not in sys.path:
+    sys.path.insert(0, SRC_ROOT)
+
+import lexer.lector as lector
+import parser_sdt.syntax_parser as parser
 
 def main():
     while True:

@@ -1,5 +1,5 @@
-from parsertable import tabla_action, tabla_goto, productions
-from sdt import tabla_simbolos, accion_semantica, imprimir_arbol, exportar_arbol_graphviz
+from .parsertable import tabla_action, tabla_goto, productions
+from .sdt import tabla_simbolos, accion_semantica, imprimir_arbol, exportar_arbol_graphviz
 
 def mapear_tokens(tokens):
     simbolos = []

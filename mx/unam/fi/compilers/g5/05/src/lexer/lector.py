@@ -1,5 +1,5 @@
 import re
-from lexertable import token              
+from .lexertable import token              
 
 # Compilamos los patrones una sola vez
 compiled_tokens = [(re.compile(pattern), token_type) for pattern, token_type in token]
