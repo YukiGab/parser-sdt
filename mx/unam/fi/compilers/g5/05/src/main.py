@@ -4,6 +4,7 @@ import parser
 def main():
     while True:
         seleccion = input("Select how you will enter your code (archive/terminal): ").strip().lower()
+        
         match seleccion:
             case "archive":
                 try:
@@ -12,16 +13,26 @@ def main():
                     if tokens:
                         print("Tokens generados exitosamente")
                         parser.analizar(tokens)
+                    else:
+                        print("Lexer error...")
+                        
                 except:
                     print("Error, invalid location")
+
                 break
+
             case "terminal":
                 code = input("Enter your code:\n")
                 tokens = lector.analizeterminal(code)
+
                 if tokens:
                     print("Tokens generados exitosamente")
                     parser.analizar(tokens)
+                else:
+                        print("Lexer error...")
+
                 break
+
             case "exit":
                 exit()
             case _:

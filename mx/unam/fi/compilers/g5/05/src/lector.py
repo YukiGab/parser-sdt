@@ -1,78 +1,53 @@
 import re
 from lexertable import token              
 
+# Compilamos los patrones una sola vez
+compiled_tokens = [(re.compile(pattern), token_type) for pattern, token_type in token]
+
+def tokenize(code):
+    lista_tokens = []
+
+    lineas = code.splitlines()
+
+    for num_linea, linea in enumerate(lineas, start=1):
+        position = 0
+
+        while position < len(linea):
+            palabra = linea[position:]
+            palabraval = False
+
+            for pattern, tipo in compiled_tokens:
+                comparar = pattern.match(palabra)
+
+                if comparar:
+                    valor = comparar.group(0)
+
+                    if tipo:
+                        lista_tokens.append((tipo, valor))
+
+                    position += len(valor)
+                    palabraval = True
+                    break
+
+            if not palabraval:
+                print(
+                    f"Error: Invalid symbol at line {num_linea}, "
+                    f"column {position + 1}: '{linea[position]}'"
+                )
+                return None
+
+    return lista_tokens
+
 def analizearchive(ruta):
-    lista_tokens =[] #creamos lista vacia
     try:
         with open(ruta,'r') as archivo:
-            lineas = archivo.read().splitlines()#leemos las lineas y las asignamos a una lista     
-
-
-        for linea in lineas: 
-            position = 0 #nos aseguramos empezar desde el inicio
-
-
-
-            while position < len(linea): #aseguramos agarrar tordos los caracteres la linea actual
-                if linea[position].isspace(): #quitamos los espacios
-                    position += 1
-                    continue
-
-                palabra = linea[position:] #podriamos decir que sirve para apuntar al siguiente token
-                palabraval = False
-
-                for palabras, tipo in token: #revisa mi tabla completa
-                    validar = re.compile(palabras) #arma una expresion regular para buscar patrones
-                    comparar = validar.match(palabra) #intenta buscar patrones al inicio de la cadena
-
-                    if comparar: #si la linea coincide con la tabla es verdadero
-                        valor = comparar.group(0) #guarda el token exacto que coincidio con la tabla
-                        if tipo: #si existe el tipo en nuestra tabla
-                            lista_tokens.append((tipo, valor)) # Guardamos tipo y lexema en una tupla
-                    
-                        position += len(valor) #nos movemos al siguiente token
-                        palabraval = True
-                        break
+            code = archivo.read()    
+    
+        return tokenize(code) #retornamos la lista de nuestros tokens totales
         
-            if not palabraval: #si no coincidio con ningun patron (en este caso, con algun elemento de nuestra tabla)
-                print(f"Error: Invalid symbol at '{linea[position]}'") 
-                return
-
-        return lista_tokens #retornamos la lista de nuestros tokens totales
     except FileNotFoundError:
         print(f"Error, file not found in {ruta}")
+        return None
 
 def analizeterminal(code):
-    lista_tokens =[] #creamos lista vacia
-    lineas = code.splitlines() #leemos las lineas y las asignamos a una lista
-    for linea in lineas: 
-            position = 0 #nos aseguramos empezar desde el inicio
-
-
-
-            while position < len(linea): #aseguramos agarrar tordos los caracteres la linea actual
-                if linea[position].isspace(): #quitamos los espacios
-                    position += 1
-                    continue
-
-                palabra = linea[position:] #podriamos decir que sirve para apuntar al siguiente token
-                palabraval = False
-
-                for palabras, tipo in token: #revisa mi tabla completa
-                    validar = re.compile(palabras) #arma una expresion regular para buscar patrones
-                    comparar = validar.match(palabra) #intenta buscar patrones al inicio de la cadena
-
-                    if comparar: #si la linea coincide con la tabla es verdadero
-                        valor = comparar.group(0) #guarda el token exacto que coincidio con la tabla
-                        if tipo: #si existe el tipo en nuestra tabla
-                            lista_tokens.append((tipo, valor)) # Guardamos tipo y lexema en una tupla
-                    
-                        position += len(valor) #nos movemos al siguiente token
-                        palabraval = True
-                        break
-        
-            if not palabraval: #si no coincidio con ningun patron (en este caso, con algun elemento de nuestra tabla)
-                print(f"Error: Invalid symbol at '{linea[position]}'") 
-                return
-
-    return lista_tokens #retornamos la lista de nuestros tokens totales
+    return tokenize(code)
