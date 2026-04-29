@@ -2,3 +2,4 @@
 *.png
 ast.dot
 ast.png
+.DS_Store
