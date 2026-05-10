@@ -1,24 +1,49 @@
 from collections import defaultdict
 
 productions = [
-    ("S'", ["S"]),
-    ("S",  ["D", ";"]),
-    ("D",  ["TYPE", "ID", "=", "E"]),
-    ("E",  ["E", "+", "T"]),
-    ("E",  ["T"]),
-    ("T",  ["T", "*", "F"]),
-    ("T",  ["F"]),
-    ("F",  ["(", "E", ")"]),
-    ("F",  ["ID"]),
-    ("F",  ["CONST"]),
+    # Programa (múltiples statements)
+    ("Program'", ["Program"]),
+    ("Program", ["StatementList"]),
+    ("StatementList", ["Statement"]),
+    ("StatementList", ["StatementList", "Statement"]),
+    
+    # Statements
+    ("Statement", ["Declaration", ";"]),
+    ("Statement", ["Assignment", ";"]),
+    ("Statement", ["Block"]),
+    
+    # Declaración con o sin inicialización, múltiples variables
+    ("Declaration", ["TYPE", "DeclList"]),
+    ("DeclList", ["DeclItem"]),
+    ("DeclList", ["DeclList", ",", "DeclItem"]),
+    ("DeclItem", ["ID"]),
+    ("DeclItem", ["ID", "=", "E"]),
+    
+    # Asignación (variable ya declarada)
+    ("Assignment", ["ID", "=", "E"]),
+    
+    # Bloque con ámbito
+    ("Block", ["{", "StatementList", "}"]),
+    ("Block", ["{", "}"]),  # bloque vacío
+    
+    # Expresiones aritméticas
+    ("E", ["E", "+", "T"]),
+    ("E", ["E", "-", "T"]),
+    ("E", ["T"]),
+    ("T", ["T", "*", "F"]),
+    ("T", ["T", "/", "F"]),
+    ("T", ["F"]),
+    ("F", ["(", "E", ")"]),
+    ("F", ["ID"]),
+    ("F", ["CONST"]),
 ]
 
 prod_num = {}
 for indice, (lado_izq, lado_der) in enumerate(productions):
     prod_num[(lado_izq, tuple(lado_der))] = indice
 
-terminales = {"TYPE", "ID", "CONST", "=", ";", "+", "*", "(", ")", "$"}
-no_terminales = {"S'", "S", "D", "E", "T", "F"}
+terminales = {"TYPE", "ID", "CONST", "=", ";", "+", "-", "*", "/", "(", ")", ",", "{", "}", "$"}
+no_terminales = {"Program'", "Program", "StatementList", "Statement", "Declaration", "DeclList", "DeclItem", "Assignment", "Block", "E", "T", "F"}
 
 primeros = {s: set() for s in terminales | no_terminales}
 for t in terminales:
@@ -84,7 +109,7 @@ def ir_a(items, X):
     return cierre_lr1(siguientes)
 
 def construir_estados_lr1():
-    inicio = cierre_lr1({("S'", ("S",), 0, "$")})
+    inicio = cierre_lr1({("Program'", ("Program",), 0, "$")})
     estados = [inicio]
     indice_estado = {inicio: 0}
     transiciones = {}
@@ -133,7 +158,7 @@ def construir_tabla_lalr():
                         nxt_lalr = lr1_a_lalr[nxt_lr1]
                         action[j_lalr][a] = f"S{nxt_lalr}"
             else:
-                if lhs == "S'":
+                if lhs == "Program'":  # Cambiado de "S'" a "Program'"
                     action[j_lalr]["$"] = "acc"
                 else:
                     num = prod_num[(lhs, rhs)]
@@ -148,3 +173,7 @@ def construir_tabla_lalr():
     return dict(action), dict(go_to)
 
 tabla_action, tabla_goto = construir_tabla_lalr()
+
+if __name__ == "__main__":
+    for i, prod in enumerate(productions):
+        print(f"{i}: {prod}")
