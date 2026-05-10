@@ -1,5 +1,6 @@
 from .parsertable import tabla_action, tabla_goto, productions
-from .sdt import tabla_simbolos, accion_semantica, imprimir_arbol, exportar_arbol_graphviz
+from .sdt import tabla_simbolos, accion_semantica, imprimir_arbol, exportar_arbol_graphviz, reset_semantica, entrar_ambito, salir_ambito
+import traceback
 
 def mapear_tokens(tokens):
     simbolos = []
@@ -31,8 +32,20 @@ def mapear_tokens(tokens):
             simbolos.append('+')
             lexemas.append(valor)
 
+        elif tipo == 'operator' and valor == '-':
+            simbolos.append('-')
+            lexemas.append(valor)
+
         elif tipo == 'operator' and valor == '*':
             simbolos.append('*')
+            lexemas.append(valor)
+
+        elif tipo == 'operator' and valor == '/':
+            simbolos.append('/')
+            lexemas.append(valor)
+        
+        elif tipo == 'punctuation' and valor == ',':
+            simbolos.append(',')
             lexemas.append(valor)
 
         elif tipo == 'punctuation' and valor == ';':
@@ -47,6 +60,14 @@ def mapear_tokens(tokens):
             simbolos.append(')')
             lexemas.append(valor)
 
+        elif tipo == 'punctuation' and valor == '{':
+            simbolos.append('{')
+            lexemas.append(valor)
+
+        elif tipo == 'punctuation' and valor == '}':
+            simbolos.append('}')
+            lexemas.append(valor)
+
         else:
             raise Exception(f"Unexpected token: {tipo} {valor}")
         
@@ -56,12 +77,16 @@ def mapear_tokens(tokens):
     return simbolos, lexemas
 
 def analizar(tokens):
-    tabla_simbolos.limpiar()
+    reset_semantica()
 
     try:
         entrada, lexemas = mapear_tokens(tokens)
+        print(f"[DEBUG] Entrada (tokens): {entrada}")
+        print(f"[DEBUG] Lexemas: {lexemas}")
+        print(f"[DEBUG] Longitud de entrada: {len(entrada)}")
     except Exception as e:
         print(f"Token mapping error: {e}")
+        traceback.print_exc()
         print("Parsing error...")
         return False
 
@@ -76,7 +101,12 @@ def analizar(tokens):
         estado = pila[-1]
         token = entrada[pos]
 
+        print(f"[DEBUG] Estado actual: {estado}, Token actual: '{token}', Posición: {pos}")
+        print(f"[DEBUG] Tabla ACTION para estado {estado}: {tabla_action.get(estado, {})}")
+
         accion = tabla_action.get(estado, {}).get(token)
+
+        print(f"[DEBUG] Acción encontrada: {accion}")
 
         if accion is None:
             print("Parsing error...")
@@ -84,6 +114,11 @@ def analizar(tokens):
 
         if accion.startswith('S'):
             siguiente = int(accion[1:])
+
+            if token == '{':
+                entrar_ambito()
+            elif token == '}':
+                salir_ambito()
 
             pila.append(token)
             pila.append(siguiente)
@@ -127,7 +162,7 @@ def analizar(tokens):
         elif accion == 'acc':
             print("Parsing Success!")
 
-            if sdt_correcto and len(tabla_simbolos.simbolos) > 0:
+            if sdt_correcto:
                 print("SDT Verified!")
                 
                 print("Symbol table:")
